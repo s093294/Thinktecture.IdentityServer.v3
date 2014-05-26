@@ -26,6 +26,13 @@ namespace Thinktecture.IdentityServer.Host
                     //factory.UserService = Thinktecture.IdentityServer.MembershipReboot.UserServiceFactory.Factory;
                     //factory.UserService = Thinktecture.IdentityServer.AspNetIdentity.UserServiceFactory.Factory;
 
+                    var efSvcFactory = new Thinktecture.IdentityServer.Core.EntityFramework.ServiceFactory("name=IdSrv3Config");
+                    efSvcFactory.ConfigureClients(LocalTestClients.Get());
+                    efSvcFactory.ConfigureScopes(LocalTestScopes.Get());
+
+                    factory.ClientService = efSvcFactory.CreateClientService;
+                    factory.ScopeService = efSvcFactory.CreateScopeService;
+
                     var options = new IdentityServerCoreOptions
                     {
                         Factory = factory,

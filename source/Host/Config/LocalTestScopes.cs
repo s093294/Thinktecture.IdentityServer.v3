@@ -62,6 +62,7 @@ namespace Thinktecture.IdentityServer.Host.Config
                     DisplayName = "Read data",
                     IsOpenIdScope = false,
                     Emphasize = false,
+                    Claims = new ScopeClaim[0]
                 },
                 new Scope
                 {
@@ -69,12 +70,14 @@ namespace Thinktecture.IdentityServer.Host.Config
                     DisplayName = "Write data",
                     IsOpenIdScope = false,
                     Emphasize = true,
+                    Claims = new ScopeClaim[0]
                 },
                 new Scope
                 {
                     Name = "forbidden",
                     DisplayName = "Forbidden scope",
-                    Emphasize = true
+                    Emphasize = true,
+                    Claims = new ScopeClaim[0]
                 }
              };
         }

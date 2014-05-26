@@ -114,6 +114,7 @@ namespace Thinktecture.IdentityServer.Host.Config
 
                     AccessTokenType = AccessTokenType.JWT,
                     AccessTokenLifetime = 360,
+                    RedirectUris = new List<Uri>()
                 },
                 new Client
                 {
@@ -131,6 +132,7 @@ namespace Thinktecture.IdentityServer.Host.Config
 
                     AccessTokenType = AccessTokenType.JWT,
                     AccessTokenLifetime = 360,
+                    RedirectUris = new List<Uri>()
                 }
             };
         }
