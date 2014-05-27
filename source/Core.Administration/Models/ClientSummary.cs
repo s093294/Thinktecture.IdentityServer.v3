@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace Thinktecture.IdentityServer.Core.Administration.Models
 {
-    public class Client
+    public class ClientSummary
     {
+        public string ClientId { get; set; }
+        public string Name { get; set; }
     }
 }

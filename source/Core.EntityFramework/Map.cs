@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Thinktecture.IdentityServer.Core.EntityFramework
 {
-    static class Map
+    public static class Map
     {
         static Map()
         {

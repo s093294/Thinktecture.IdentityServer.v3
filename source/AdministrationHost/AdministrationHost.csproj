@@ -38,6 +38,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Owin, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -84,6 +91,10 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core.Administration.EntityFramework\Core.Administration.EntityFramework.csproj">
+      <Project>{c9bd0c80-dfef-4229-8a1e-32f7b69b14cc}</Project>
+      <Name>Core.Administration.EntityFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Core.Administration\Core.Administration.csproj">
       <Project>{e2bbe794-f073-4b89-bace-cda0d5072aca}</Project>
       <Name>Core.Administration</Name>

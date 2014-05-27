@@ -8,6 +8,6 @@ namespace Thinktecture.IdentityServer.Core.Administration
 {
     public class IdentityServerAdministrationOptions
     {
-        public ServiceFactory ServiceFactory { get; set; }
+        public StoreFactory ServiceFactory { get; set; }
     }
 }

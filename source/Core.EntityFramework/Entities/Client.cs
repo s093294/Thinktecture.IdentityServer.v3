@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,11 +11,14 @@ namespace Thinktecture.IdentityServer.Core.EntityFramework.Entities
 {
     public class Client
     {
+        [Key]
         public virtual int ID { get; set; }
         public virtual bool Enabled { get; set; }
 
+        [Required]
         public virtual string ClientId { get; set; }
         public virtual string ClientSecret { get; set; }
+        [Required]
         public virtual string ClientName { get; set; }
         public virtual string ClientUri { get; set; }
         public virtual string LogoUri { get; set; }
@@ -24,9 +29,13 @@ namespace Thinktecture.IdentityServer.Core.EntityFramework.Entities
         public virtual Flows Flow { get; set; }
 
         // in seconds
+        [Range(0, Int32.MaxValue)]
         public virtual int IdentityTokenLifetime { get; set; }
+        [Range(0, Int32.MaxValue)]
         public virtual int AccessTokenLifetime { get; set; }
+        [Range(0, Int32.MaxValue)]
         public virtual int RefreshTokenLifetime { get; set; }
+        [Range(0, Int32.MaxValue)]
         public virtual int AuthorizationCodeLifetime { get; set; }
 
         public virtual SigningKeyTypes IdentityTokenSigningKeyType { get; set; }

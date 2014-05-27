@@ -71,16 +71,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\ClientsController.cs" />
+    <Compile Include="Api\MetaController.cs" />
+    <Compile Include="Api\ScopesController.cs" />
     <Compile Include="Configuration\AppBuilderExtensions.cs" />
     <Compile Include="Configuration\AutofacConfig.cs" />
     <Compile Include="Configuration\IdentityServerAdministrationOptions.cs" />
     <Compile Include="Configuration\ServiceFactory.cs" />
     <Compile Include="Configuration\WebApiConfig.cs" />
-    <Compile Include="Models\Scope.cs" />
-    <Compile Include="Models\Client.cs" />
+    <Compile Include="Extensions\ModelStateExtensions.cs" />
+    <Compile Include="Models\ClientSummary.cs" />
+    <Compile Include="Models\Payload.cs" />
+    <Compile Include="Validation\ScopeValidator.cs" />
+    <Compile Include="Validation\ClientValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\IScopeService.cs" />
-    <Compile Include="Services\IClientService.cs" />
+    <Compile Include="Stores\IScopeStore.cs" />
+    <Compile Include="Stores\IClientStore.cs" />
+    <Compile Include="Validation\ValidationError.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
@@ -92,10 +99,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Api\Controllers\" />
-    <Folder Include="Api\Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
