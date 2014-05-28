@@ -245,6 +245,10 @@ function(){this.$get=function(){return{}}});n.directive("ngView",x);n.directive(
                 controller: 'HomeCtrl',
                 templateUrl: 'Templates/home.html'
             })
+            .when("/clients", {
+                controller: 'ClientsCtrl',
+                templateUrl: 'Templates/clients/list.html'
+            })
             .otherwise({
                 redirectTo: '/'
             });
@@ -259,6 +263,10 @@ function(){this.$get=function(){return{}}});n.directive("ngView",x);n.directive(
     app.controller("HomeCtrl", function ($scope) {
         $scope.model = {};
     });
-   
+
+    app.controller("ClientsCtrl", function ($scope) {
+        $scope.model = {};
+    });
+
 })(angular);
 

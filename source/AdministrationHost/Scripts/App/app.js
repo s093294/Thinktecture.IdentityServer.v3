@@ -9,6 +9,10 @@
                 controller: 'HomeCtrl',
                 templateUrl: 'Templates/home.html'
             })
+            .when("/clients", {
+                controller: 'ClientsCtrl',
+                templateUrl: 'Templates/clients/list.html'
+            })
             .otherwise({
                 redirectTo: '/'
             });
@@ -23,5 +27,9 @@
     app.controller("HomeCtrl", function ($scope) {
         $scope.model = {};
     });
-   
+
+    app.controller("ClientsCtrl", function ($scope) {
+        $scope.model = {};
+    });
+
 })(angular);
