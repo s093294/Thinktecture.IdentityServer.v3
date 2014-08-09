@@ -5,13 +5,12 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Thinktecture.IdentityServer.Core.Connect.Models;
-using Thinktecture.IdentityServer.Core.Connect.Services;
 
 namespace Thinktecture.IdentityServer.Core.Services.InMemory
 {
     public class InMemoryAuthorizationCodeStore : IAuthorizationCodeStore
     {
-        ConcurrentDictionary<string, AuthorizationCode> _repository = new ConcurrentDictionary<string, AuthorizationCode>();
+        private readonly ConcurrentDictionary<string, AuthorizationCode> _repository = new ConcurrentDictionary<string, AuthorizationCode>();
 
         public Task StoreAsync(string key, AuthorizationCode value)
         {

@@ -5,13 +5,12 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Thinktecture.IdentityServer.Core.Connect.Models;
-using Thinktecture.IdentityServer.Core.Connect.Services;
 
 namespace Thinktecture.IdentityServer.Core.Services.InMemory
 {
     public class InMemoryTokenHandleStore : ITokenHandleStore
     {
-        ConcurrentDictionary<string, Token> _repository = new ConcurrentDictionary<string, Token>();
+        readonly ConcurrentDictionary<string, Token> _repository = new ConcurrentDictionary<string, Token>();
 
         public Task StoreAsync(string key, Token value)
         {

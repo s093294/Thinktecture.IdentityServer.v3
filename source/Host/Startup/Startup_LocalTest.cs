@@ -1,5 +1,4 @@
 ﻿using Microsoft.Owin;
-using Microsoft.Owin.Cors;
 using Microsoft.Owin.Security.Facebook;
 using Microsoft.Owin.Security.Google;
 using Microsoft.Owin.Security.Twitter;
@@ -7,8 +6,6 @@ using Owin;
 using Thinktecture.IdentityServer.Core.Configuration;
 using Thinktecture.IdentityServer.Core.Logging;
 using Thinktecture.IdentityServer.Host.Config;
-using Thinktecture.IdentityServer.WsFederation.Configuration;
-using Thinktecture.IdentityServer.WsFederation.Services;
 
 [assembly: OwinStartup("LocalTest", typeof(Thinktecture.IdentityServer.Host.Startup_LocalTest))]
 
@@ -20,49 +17,28 @@ namespace Thinktecture.IdentityServer.Host
         {
             LogProvider.SetCurrentLogProvider(new DiagnosticsTraceLogProvider());
 
+            // uncomment to enable HSTS headers for the host
+            // see: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
+            //app.UseHsts();
+
             app.Map("/core", coreApp =>
                 {
-                    // allow cross origin calls
-                    coreApp.UseCors(CorsOptions.AllowAll);
-
-                    var factory = LocalTestFactory.Create(
-                        issuerUri: "https://idsrv3.com",
-                        siteName: "Thinktecture IdentityServer v3 - preview 1",
-                        publicHostAddress: "http://localhost:3333/core");
-
-                    //factory.UserService = Thinktecture.IdentityServer.MembershipReboot.UserServiceFactory.Factory;
-                    //factory.UserService = Thinktecture.IdentityServer.AspNetIdentity.UserServiceFactory.Factory;
+                    var factory = Factory.Create();
 
                     var idsrvOptions = new IdentityServerOptions
                     {
+                        IssuerUri = "https://idsrv3.com",
+                        SiteName = "Thinktecture IdentityServer v3 - preview 1",
+                        SigningCertificate = Cert.Load(),
+                        CspReportEndpoint = EndpointSettings.Enabled,
+                        AccessTokenValidationEndpoint = EndpointSettings.Enabled,
+                        PublicHostName = "http://localhost:3333",
                         Factory = factory,
                         AdditionalIdentityProviderConfiguration = ConfigureAdditionalIdentityProviders,
-                        ConfigurePlugins = ConfigurePlugins
+                        CorsPolicy = CorsPolicy.AllowAll
                     };
-
                     coreApp.UseIdentityServer(idsrvOptions);
-                        
                 });
-        }
-
-        private void ConfigurePlugins(IAppBuilder pluginApp, IdentityServerOptions options)
-        {
-            var wsfedOptions = new WsFederationPluginOptions
-            {
-                // todo - also signoutcleanup is broken right now
-                LoginPageUrl = "http://localhost:3333/core/login",
-                LogoutPageUrl = "http://localhost:3333/core/connect/logout",
-
-                Factory = new WsFederationServiceFactory
-                {
-                    UserService = options.Factory.UserService,
-                    CoreSettings = options.Factory.CoreSettings,
-                    RelyingPartyService = () => new InMemoryRelyingPartyService(LocalTestRelyingParties.Get()),
-                    WsFederationSettings = () => new LocalTestWsFederationSettings()
-                },
-            };
-
-            pluginApp.UseWsFederationPlugin(wsfedOptions);
         }
 
         public static void ConfigureAdditionalIdentityProviders(IAppBuilder app, string signInAsType)

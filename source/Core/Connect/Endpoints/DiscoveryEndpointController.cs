@@ -16,63 +16,62 @@ using Thinktecture.IdentityServer.Core.Services;
 
 namespace Thinktecture.IdentityServer.Core.Connect
 {
-    [RoutePrefix(".well-known")]
     public class DiscoveryEndpointController : ApiController
     {
         private readonly static ILog Logger = LogProvider.GetCurrentClassLogger();
-        private readonly CoreSettings _settings;
-        private readonly IScopeService _scopes;
+        private readonly IdentityServerOptions _options;
+        private readonly IScopeStore _scopes;
 
-        public DiscoveryEndpointController(CoreSettings settings, IScopeService scopes)
+        public DiscoveryEndpointController(IdentityServerOptions options, IScopeStore scopes)
         {
-            _settings = settings;
+            _options = options;
             _scopes = scopes;
         }
 
-        [Route("openid-configuration")]
+        [Route(Constants.RoutePaths.Oidc.DiscoveryConfiguration)]
         public async Task<IHttpActionResult> GetConfiguration()
         {
             Logger.Info("Start discovery request");
 
-            if (!_settings.DiscoveryEndpoint.IsEnabled)
+            if (!_options.DiscoveryEndpoint.IsEnabled)
             {
                 Logger.Warn("Endpoint is disabled. Aborting");
                 return NotFound();
             }
 
-            var baseUrl = Request.GetBaseUrl(_settings.PublicHostName);
+            var baseUrl = Request.GetIdentityServerBaseUrl();
             var scopes = await _scopes.GetScopesAsync();
 
             return Json(new
             {
-                issuer = _settings.IssuerUri,
-                jwks_uri = baseUrl + ".well-known/jwks",
-                authorization_endpoint = baseUrl + "connect/authorize",
-                token_endpoint = baseUrl + "connect/token",
-                userinfo_endpoint = baseUrl + "connect/userinfo",
-                end_session_endpoint = baseUrl + "connect/logout",
+                issuer = _options.IssuerUri,
+                jwks_uri = baseUrl + Constants.RoutePaths.Oidc.DiscoveryWebKeys,
+                authorization_endpoint = baseUrl + Constants.RoutePaths.Oidc.Authorize,
+                token_endpoint = baseUrl + Constants.RoutePaths.Oidc.Token,
+                userinfo_endpoint = baseUrl + Constants.RoutePaths.Oidc.UserInfo,
+                end_session_endpoint = baseUrl + Constants.RoutePaths.Oidc.EndSession,
                 scopes_supported = scopes.Select(s => s.Name),
                 response_types_supported = Constants.SupportedResponseTypes,
                 response_modes_supported = Constants.SupportedResponseModes,
                 grant_types_supported = Constants.SupportedGrantTypes,
-                subject_types_support = new string[] { "pairwise", "public" },
+                subject_types_support = new[] { "pairwise", "public" },
                 id_token_signing_alg_values_supported = "RS256"
             });
         }
 
-        [Route("jwks")]
+        [Route(Constants.RoutePaths.Oidc.DiscoveryWebKeys)]
         public IHttpActionResult GetKeyData()
         {
             Logger.Info("Start key discovery request");
 
-            if (!_settings.DiscoveryEndpoint.IsEnabled)
+            if (!_options.DiscoveryEndpoint.IsEnabled)
             {
                 Logger.Warn("Endpoint is disabled. Aborting");
                 return NotFound();
             }
 
             var webKeys = new List<JsonWebKeyDto>();
-            foreach (var pubKey in _settings.PublicKeysForMetadata)
+            foreach (var pubKey in _options.PublicKeysForMetadata)
             {
                 if (pubKey != null)
                 {
@@ -85,7 +84,7 @@ namespace Thinktecture.IdentityServer.Core.Connect
                         use = "sig",
                         kid = thumbprint,
                         x5t = thumbprint,
-                        x5c = new string[] { cert64 }
+                        x5c = new[] { cert64 }
                     };
 
                     webKeys.Add(webKey);

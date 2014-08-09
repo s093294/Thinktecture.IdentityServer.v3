@@ -8,28 +8,25 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Thinktecture.IdentityServer.Core.Authentication;
-using Thinktecture.IdentityServer.Core.Configuration;
 using Thinktecture.IdentityServer.Core.Connect.Models;
+using Thinktecture.IdentityServer.Core.Extensions;
+using Thinktecture.IdentityServer.Core.Resources;
 using Thinktecture.IdentityServer.Core.Services;
 
 namespace Thinktecture.IdentityServer.Core.Connect
 {
     public class AuthorizeInteractionResponseGenerator
     {
-        private SignInMessage _signIn;
-        private CoreSettings _settings;
+        private readonly SignInMessage _signIn;
+        private readonly IConsentService _consent;
 
-        private IConsentService _consent;
-
-        public AuthorizeInteractionResponseGenerator(CoreSettings settings, IConsentService consent)
+        public AuthorizeInteractionResponseGenerator(IConsentService consent)
         {
             _signIn = new SignInMessage();
-
-            _settings = settings;
             _consent = consent;
         }
 
-        public InteractionResponse ProcessLogin(ValidatedAuthorizeRequest request, ClaimsPrincipal user)
+        public LoginInteractionResponse ProcessLogin(ValidatedAuthorizeRequest request, ClaimsPrincipal user)
         {
             // pass through display mode to signin service
             if (request.DisplayMode.IsPresent())
@@ -40,7 +37,16 @@ namespace Thinktecture.IdentityServer.Core.Connect
             // pass through ui locales to signin service
             if (request.UiLocales.IsPresent())
             {
-                _signIn.UILocales = request.UiLocales;
+                _signIn.UiLocales = request.UiLocales;
+            }
+
+            // check login_hint - we only support idp: right now
+            if (request.LoginHint.IsPresent())
+            {
+                if (request.LoginHint.StartsWith("idp:"))
+                {
+                    _signIn.IdP = request.LoginHint.Substring(4);
+                }
             }
 
             if (request.PromptMode == Constants.PromptModes.Login)
@@ -48,9 +54,8 @@ namespace Thinktecture.IdentityServer.Core.Connect
                 // remove prompt so when we redirect back in from login page
                 // we won't think we need to force a prompt again
                 request.Raw.Remove(Constants.AuthorizeRequest.Prompt);
-                return new InteractionResponse
+                return new LoginInteractionResponse
                 {
-                    IsLogin = true,
                     SignInMessage = _signIn
                 };
             }
@@ -61,9 +66,8 @@ namespace Thinktecture.IdentityServer.Core.Connect
                 // prompt=none means user must be signed in already
                 if (request.PromptMode == Constants.PromptModes.None)
                 {
-                    return new InteractionResponse
+                    return new LoginInteractionResponse
                     {
-                        IsError = true,
                         Error = new AuthorizeError
                         {
                             ErrorType = ErrorTypes.Client,
@@ -75,9 +79,8 @@ namespace Thinktecture.IdentityServer.Core.Connect
                     };
                 }
 
-                return new InteractionResponse
+                return new LoginInteractionResponse
                 {
-                    IsLogin = true,
                     SignInMessage = _signIn
                 };
             }
@@ -88,26 +91,33 @@ namespace Thinktecture.IdentityServer.Core.Connect
                 var authTime = user.GetAuthenticationTime();
                 if (DateTime.UtcNow > authTime.AddSeconds(request.MaxAge.Value))
                 {
-                    return new InteractionResponse
+                    return new LoginInteractionResponse
                     {
-                        IsLogin = true,
                         SignInMessage = _signIn
                     };
                 }
             }
 
-            return new InteractionResponse();
+            return new LoginInteractionResponse();
         }
 
-        public async Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, UserConsent consent)
+        public async Task<ConsentInteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, UserConsent consent = null)
         {
+            if (request == null) throw new ArgumentNullException("request");
+
+            if (request.PromptMode != null && 
+                request.PromptMode != Constants.PromptModes.None &&
+                request.PromptMode != Constants.PromptModes.Consent)
+            {
+                throw new ArgumentException("Invalid PromptMode");
+            }
+
             var consentRequired = await _consent.RequiresConsentAsync(request.Client, request.Subject, request.RequestedScopes);
 
             if (consentRequired && request.PromptMode == Constants.PromptModes.None)
             {
-                return new InteractionResponse
+                return new ConsentInteractionResponse
                 {
-                    IsError = true,
                     Error = new AuthorizeError
                     {
                         ErrorType = ErrorTypes.Client,
@@ -121,7 +131,7 @@ namespace Thinktecture.IdentityServer.Core.Connect
 
             if (request.PromptMode == Constants.PromptModes.Consent || consentRequired)
             {
-                var response = new InteractionResponse();
+                var response = new ConsentInteractionResponse();
 
                 // did user provide consent
                 if (consent == null)
@@ -138,7 +148,6 @@ namespace Thinktecture.IdentityServer.Core.Connect
                     {
                         // no need to show consent screen again
                         // build access denied error to return to client
-                        response.IsError = true;
                         response.Error = new AuthorizeError { 
                             ErrorType = ErrorTypes.Client,
                             Error = Constants.AuthorizeErrors.AccessDenied,
@@ -157,10 +166,9 @@ namespace Thinktecture.IdentityServer.Core.Connect
                             // they said yes, but didn't pick any scopes
                             // show consent again and provide error message
                             response.IsConsent = true;
-                            response.ConsentError = "Must select at least one permission.";
+                            response.ConsentError = Messages.MustSelectAtLeastOnePermission;
                         }
-                        
-                        if (request.Client.AllowRememberConsent)
+                        else if (request.Client.AllowRememberConsent)
                         {
                             // remember consent
                             var scopes = Enumerable.Empty<string>();
@@ -178,7 +186,7 @@ namespace Thinktecture.IdentityServer.Core.Connect
                 return response;
             }
 
-            return new InteractionResponse();
+            return new ConsentInteractionResponse();
         }
     }
 }

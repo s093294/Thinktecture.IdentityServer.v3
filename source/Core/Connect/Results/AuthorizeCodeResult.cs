@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Thinktecture.IdentityServer.Core.Connect.Models;
+using Thinktecture.IdentityServer.Core.Extensions;
 using Thinktecture.IdentityServer.Core.Logging;
 
 namespace Thinktecture.IdentityServer.Core.Connect.Results
@@ -26,7 +27,7 @@ namespace Thinktecture.IdentityServer.Core.Connect.Results
 
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult<HttpResponseMessage>(Execute());
+            return Task.FromResult(Execute());
         }
 
         private HttpResponseMessage Execute()

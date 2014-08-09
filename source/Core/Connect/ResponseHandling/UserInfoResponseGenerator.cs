@@ -6,7 +6,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Thinktecture.IdentityServer.Core.Configuration;
+using Thinktecture.IdentityServer.Core.Extensions;
 using Thinktecture.IdentityServer.Core.Logging;
 using Thinktecture.IdentityServer.Core.Services;
 
@@ -16,14 +16,12 @@ namespace Thinktecture.IdentityServer.Core.Connect
     {
         private readonly static ILog Logger = LogProvider.GetCurrentClassLogger();
         private readonly IUserService _users;
-        private readonly IScopeService _scopes;
-        private readonly CoreSettings _settings;
+        private readonly IScopeStore _scopes;
 
-        public UserInfoResponseGenerator(IUserService users, IScopeService scopes, CoreSettings settings)
+        public UserInfoResponseGenerator(IUserService users, IScopeStore scopes)
         {
             _users = users;
             _scopes = scopes;
-            _settings = settings;
         }
 
         public async Task<Dictionary<string, object>> ProcessAsync(string subject, IEnumerable<string> scopes)
@@ -38,18 +36,7 @@ namespace Thinktecture.IdentityServer.Core.Connect
             
             if (profileClaims != null)
             {
-                foreach (var claim in profileClaims)
-                {
-                    if (profileData.ContainsKey(claim.Type))
-                    {
-                        Logger.Warn("Duplicate claim type detected: " + claim.Type);
-                    }
-                    else
-                    {
-                        profileData.Add(claim.Type, claim.Value);
-                    }
-                }
-
+                profileData = profileClaims.ToClaimsDictionary();
                 Logger.InfoFormat("Profile service returned to the following claim types: {0}", profileClaims.Select(c => c.Type).ToSpaceSeparatedString());
             }
             else
@@ -62,7 +49,7 @@ namespace Thinktecture.IdentityServer.Core.Connect
 
         public async Task<IEnumerable<string>> GetRequestedClaimTypesAsync(IEnumerable<string> scopes)
         {
-            if (scopes == null || scopes.Count() == 0)
+            if (scopes == null || !scopes.Any())
             {
                 return Enumerable.Empty<string>();
             }

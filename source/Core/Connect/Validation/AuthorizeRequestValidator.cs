@@ -8,7 +8,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using Thinktecture.IdentityServer.Core.Configuration;
-using Thinktecture.IdentityServer.Core.Connect.Services;
+using Thinktecture.IdentityServer.Core.Extensions;
 using Thinktecture.IdentityServer.Core.Logging;
 using Thinktecture.IdentityServer.Core.Models;
 using Thinktecture.IdentityServer.Core.Services;
@@ -20,11 +20,10 @@ namespace Thinktecture.IdentityServer.Core.Connect
         private readonly static ILog Logger = LogProvider.GetCurrentClassLogger();
 
         private readonly ValidatedAuthorizeRequest _validatedRequest;
-        private readonly CoreSettings _core;
-        private readonly IScopeService _scopes;
-        private readonly IClientService _clients;
+        private readonly IdentityServerOptions _options;
+        private readonly IScopeStore _scopes;
+        private readonly IClientStore _clients;
         private readonly ICustomRequestValidator _customValidator;
-        private readonly IUserService _users;
 
         public ValidatedAuthorizeRequest ValidatedRequest
         {
@@ -34,16 +33,15 @@ namespace Thinktecture.IdentityServer.Core.Connect
             }
         }
 
-        public AuthorizeRequestValidator(CoreSettings core, IScopeService scopes, IClientService clients, IUserService users, ICustomRequestValidator customValidator)
+        public AuthorizeRequestValidator(IdentityServerOptions options, IScopeStore scopes, IClientStore clients, ICustomRequestValidator customValidator)
         {
-            _core = core;
+            _options = options;
             _scopes = scopes;
             _clients = clients;
-            _users = users;
             _customValidator = customValidator;
 
             _validatedRequest = new ValidatedAuthorizeRequest();
-            _validatedRequest.CoreSettings = _core;
+            _validatedRequest.IdentityServerOptions = _options;
         }
 
         // basic protocol validation
@@ -298,6 +296,16 @@ namespace Thinktecture.IdentityServer.Core.Connect
                 }
             }
 
+            //////////////////////////////////////////////////////////
+            // check login_hint
+            //////////////////////////////////////////////////////////
+            var loginHint = parameters.Get(Constants.AuthorizeRequest.LoginHint);
+            if (loginHint.IsPresent())
+            {
+                Logger.InfoFormat("login_hint: {0}", loginHint);
+                _validatedRequest.LoginHint = loginHint;
+            }
+
             // todo: parse amr, acr
 
             Logger.Info("Protocol validation successful");
@@ -368,7 +376,9 @@ namespace Thinktecture.IdentityServer.Core.Connect
                 return Invalid(ErrorTypes.Client, Constants.AuthorizeErrors.InvalidScope);
             }
 
-            if (scopeValidator.ContainsResourceScopes)
+            if (scopeValidator.ContainsResourceScopes ||
+                _validatedRequest.ResponseType == Constants.ResponseTypes.IdTokenToken ||
+                _validatedRequest.ResponseType == Constants.ResponseTypes.Token)
             {
                 _validatedRequest.IsResourceRequest = true;
             }
@@ -383,7 +393,7 @@ namespace Thinktecture.IdentityServer.Core.Connect
                 return Invalid(ErrorTypes.Client, Constants.AuthorizeErrors.InvalidScope);
             }
 
-            var customResult = await _customValidator.ValidateAuthorizeRequestAsync(_validatedRequest, _users);
+            var customResult = await _customValidator.ValidateAuthorizeRequestAsync(_validatedRequest);
 
             if (customResult.IsError)
             {

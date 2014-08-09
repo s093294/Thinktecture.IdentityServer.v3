@@ -3,7 +3,6 @@
  * see license
  */
 
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -11,40 +10,38 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Thinktecture.IdentityServer.Core.Connect.Models;
+using Thinktecture.IdentityServer.Core.Extensions;
 using Thinktecture.IdentityServer.Core.Logging;
+using Thinktecture.IdentityServer.Core.Views.Embedded.Assets;
 
 namespace Thinktecture.IdentityServer.Core.Connect.Results
 {
     public class AuthorizeImplicitFormPostResult : IHttpActionResult
     {
         private readonly static ILog Logger = LogProvider.GetCurrentClassLogger();
+        private readonly HttpRequestMessage _request;
         private readonly AuthorizeResponse _response;
 
-        public AuthorizeImplicitFormPostResult(AuthorizeResponse response)
+        public AuthorizeImplicitFormPostResult(HttpRequestMessage request, AuthorizeResponse response)
         {
+            _request = request;
             _response = response;
         }
 
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult<HttpResponseMessage>(Execute());
+            return Task.FromResult(Execute());
         }
 
         private HttpResponseMessage Execute()
         {
-            string form;
-            using (var stream = this.GetType().Assembly.GetManifestResourceStream("Thinktecture.IdentityServer.Core.Connect.FormPostResponse.html"))
-            {
-                using (var reader = new StreamReader(stream))
-                {
-                    form = reader.ReadToEnd();
-                }
-            }
-
+            // TODO : cleanup using embedded assets helpers
+            var root = _request.GetRequestContext().VirtualPathRoot;
+            string form = AssetManager.LoadResourceString("Thinktecture.IdentityServer.Core.Views.Embedded.Assets.app.FormPostResponse.html", new { rootUrl = root });
             form = form.Replace("{{redirect_uri}}", _response.RedirectUri.AbsoluteUri);
 
             var sb = new StringBuilder(128);
-            var inputFieldFormat = "<input type=\"hidden\" name=\"{0}\" value=\"{1}\" />\n";
+            const string inputFieldFormat = "<input type=\"hidden\" name=\"{0}\" value=\"{1}\" />\n";
 
             if (_response.IdentityToken.IsPresent())
             {

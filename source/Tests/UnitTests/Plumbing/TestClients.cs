@@ -69,7 +69,7 @@ namespace Thinktecture.IdentityServer.Tests.Plumbing
                         ClientId = "client",
                         ClientSecret = "secret",
                         Flow = Flows.ClientCredentials,
-                        AccessTokenType = AccessTokenType.JWT
+                        AccessTokenType = AccessTokenType.Jwt
                     },
                     new Client
                     {
@@ -103,6 +103,20 @@ namespace Thinktecture.IdentityServer.Tests.Plumbing
                         ScopeRestrictions = new List<string>
                         {
                             "resource"
+                        },       
+                    },
+                    new Client
+                    {
+                        ClientName = "Resource Owner Client (restricted)",
+                        Enabled = true,
+                        ClientId = "roclient_restricted_refresh",
+                        ClientSecret = "secret",
+                        Flow = Flows.ResourceOwner,
+
+                        ScopeRestrictions = new List<string>
+                        {
+                            "resource",
+                            "offline_access"
                         },       
                     },
                     new Client

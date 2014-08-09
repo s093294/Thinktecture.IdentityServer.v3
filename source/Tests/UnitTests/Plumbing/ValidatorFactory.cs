@@ -1,10 +1,10 @@
-﻿using Thinktecture.IdentityServer.Core.Configuration;
-/*
+﻿/*
  * Copyright (c) Dominick Baier, Brock Allen.  All rights reserved.
  * see license
  */
+
+using Thinktecture.IdentityServer.Core.Configuration;
 using Thinktecture.IdentityServer.Core.Connect;
-using Thinktecture.IdentityServer.Core.Connect.Services;
 using Thinktecture.IdentityServer.Core.Services;
 using Thinktecture.IdentityServer.Core.Services.InMemory;
 using Thinktecture.IdentityServer.Tests.Plumbing;
@@ -13,38 +13,39 @@ namespace UnitTests.Plumbing
 {
     static class Factory
     {
-        public static IClientService CreateClientService()
+        public static IClientStore CreateClientStore()
         {
-            return new InMemoryClientService(TestClients.Get());
+            return new InMemoryClientStore(TestClients.Get());
         }
 
         public static ClientValidator CreateClientValidator(
-            IClientService clients = null)
+            IClientStore clients = null)
         {
             if (clients == null)
             {
-                clients = new InMemoryClientService(TestClients.Get());
+                clients = new InMemoryClientStore(TestClients.Get());
             }
 
             return new ClientValidator(clients);
         }
 
         public static TokenRequestValidator CreateTokenValidator(
-            CoreSettings settings = null,
-            IScopeService scopes = null,
+            IdentityServerOptions options = null,
+            IScopeStore scopes = null,
             IAuthorizationCodeStore authorizationCodeStore = null,
+            IRefreshTokenStore refreshTokens = null,
             IUserService userService = null,
             IAssertionGrantValidator assertionGrantValidator = null,
             ICustomRequestValidator customRequestValidator = null)
         {
-            if (settings == null)
+            if (options == null)
             {
-                settings = new TestSettings();
+                options = Thinktecture.IdentityServer.Tests.TestIdentityServerOptions.Create();
             }
 
             if (scopes == null)
             {
-                scopes = new InMemoryScopeService(TestScopes.Get());
+                scopes = new InMemoryScopeStore(TestScopes.Get());
             }
 
             if (userService == null)
@@ -62,29 +63,34 @@ namespace UnitTests.Plumbing
                 assertionGrantValidator = new TestAssertionValidator();
             }
 
-            return new TokenRequestValidator(settings, authorizationCodeStore, userService, scopes, assertionGrantValidator, customRequestValidator);
+            if (refreshTokens == null)
+            {
+                refreshTokens = new InMemoryRefreshTokenStore();
+            }
+
+            return new TokenRequestValidator(options, authorizationCodeStore, refreshTokens, userService, scopes, assertionGrantValidator, customRequestValidator);
         }
 
         public static AuthorizeRequestValidator CreateAuthorizeValidator(
-            CoreSettings settings = null,
-            IScopeService scopes = null,
-            IClientService clients = null,
+            IdentityServerOptions options = null,
+            IScopeStore scopes = null,
+            IClientStore clients = null,
             IUserService users = null,
             ICustomRequestValidator customValidator = null)
         {
-            if (settings == null)
+            if (options == null)
             {
-                settings = new TestSettings();
+                options = Thinktecture.IdentityServer.Tests.TestIdentityServerOptions.Create();
             }
 
             if (scopes == null)
             {
-                scopes = new InMemoryScopeService(TestScopes.Get());
+                scopes = new InMemoryScopeStore(TestScopes.Get());
             }
 
             if (clients == null)
             {
-                clients = new InMemoryClientService(TestClients.Get());
+                clients = new InMemoryClientStore(TestClients.Get());
             }
 
             if (customValidator == null)
@@ -92,12 +98,7 @@ namespace UnitTests.Plumbing
                 customValidator = new DefaultCustomRequestValidator();
             }
 
-            if (users == null)
-            {
-                users = new TestUserService();
-            }
-
-            return new AuthorizeRequestValidator(settings, scopes, clients, users, customValidator);
+            return new AuthorizeRequestValidator(options, scopes, clients, customValidator);
         }
     }
 }

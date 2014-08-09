@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Thinktecture.IdentityModel;
 using Thinktecture.IdentityServer.Core.Connect.Models;
+using Thinktecture.IdentityServer.Core.Extensions;
 using Thinktecture.IdentityServer.Core.Logging;
 using Thinktecture.IdentityServer.Core.Models;
 using Thinktecture.IdentityServer.Core.Services;
@@ -19,9 +20,9 @@ namespace Thinktecture.IdentityServer.Core.Connect
     public class ClientValidator
     {
         private readonly static ILog Logger = LogProvider.GetCurrentClassLogger();
-        private readonly IClientService _clients;
+        private readonly IClientStore _clients;
 
-        public ClientValidator(IClientService clients)
+        public ClientValidator(IClientStore clients)
         {
             _clients = clients;
         }

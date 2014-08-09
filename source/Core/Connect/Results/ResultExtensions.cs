@@ -13,23 +13,6 @@ namespace Thinktecture.IdentityServer.Core.Connect
 {
     public static class ResultExtensions
     {
-        public static IHttpActionResult AuthorizeError(this ApiController controller, AuthorizeError error)
-        {
-            return new AuthorizeErrorResult(error);
-        }
-
-        public static IHttpActionResult AuthorizeError(this ApiController controller, ErrorTypes errorType, string error, string responseMode, Uri errorUri, string state)
-        {
-            return new AuthorizeErrorResult(new AuthorizeError
-                {
-                    ErrorType = errorType,
-                    Error = error,
-                    ResponseMode = responseMode,
-                    ErrorUri = errorUri,
-                    State = state
-                });
-        }
-
         public static IHttpActionResult AuthorizeCodeResponse(this ApiController controller, Uri redirectUri, string code, string state)
         {
             return new AuthorizeCodeResult(new AuthorizeResponse
@@ -64,7 +47,7 @@ namespace Thinktecture.IdentityServer.Core.Connect
 
         public static IHttpActionResult AuthorizeImplicitFormPostResponse(this ApiController controller, Uri redirectUri, string identityToken, string state)
         {
-            return new AuthorizeImplicitFormPostResult(new AuthorizeResponse
+            return new AuthorizeImplicitFormPostResult(controller.Request, new AuthorizeResponse
             {
                 RedirectUri = redirectUri,
                 IdentityToken = identityToken,
@@ -74,7 +57,7 @@ namespace Thinktecture.IdentityServer.Core.Connect
 
         public static IHttpActionResult AuthorizeImplicitFormPostResponse(this ApiController controller, AuthorizeResponse response)
         {
-            return new AuthorizeImplicitFormPostResult(response);
+            return new AuthorizeImplicitFormPostResult(controller.Request, response);
         }
 
         public static IHttpActionResult TokenResponse(this ApiController controller, TokenResponse response)

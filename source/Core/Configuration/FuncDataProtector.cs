@@ -1,11 +1,15 @@
-﻿using System;
+﻿/*
+ * Copyright (c) Dominick Baier, Brock Allen.  All rights reserved.
+ * see license
+ */
+using System;
 
 namespace Thinktecture.IdentityServer.Core.Configuration
 {
     public class FuncDataProtector : IDataProtector
     {
-        Func<byte[], string, byte[]> _protectFunc;
-        Func<byte[], string, byte[]> _unprotectFunc;
+        readonly Func<byte[], string, byte[]> _protectFunc;
+        readonly Func<byte[], string, byte[]> _unprotectFunc;
 
         public FuncDataProtector(
             Func<byte[], string, byte[]> protectFunc,

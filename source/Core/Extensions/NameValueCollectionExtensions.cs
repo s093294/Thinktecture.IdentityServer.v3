@@ -8,7 +8,7 @@ using System.Collections.Specialized;
 using System.Net;
 using System.Text;
 
-namespace Thinktecture.IdentityServer.Core
+namespace Thinktecture.IdentityServer.Core.Extensions
 {
     public static class NameValueCollectionExtensions
     {
@@ -19,7 +19,7 @@ namespace Thinktecture.IdentityServer.Core
                 return String.Empty;
             }
 
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             bool first = true;
             foreach (string name in collection)
             {

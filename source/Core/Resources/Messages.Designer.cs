@@ -27,7 +27,7 @@ namespace Thinktecture.IdentityServer.Core.Resources
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Messages {
+    public class Messages {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -41,7 +41,7 @@ namespace Thinktecture.IdentityServer.Core.Resources
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Thinktecture.IdentityServer.Core.Resources.Messages", typeof(Messages).Assembly);
@@ -56,7 +56,7 @@ namespace Thinktecture.IdentityServer.Core.Resources
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -68,16 +68,25 @@ namespace Thinktecture.IdentityServer.Core.Resources
         /// <summary>
         ///   Looks up a localized string similar to Invalid Username or Password.
         /// </summary>
-        internal static string InvalidUsernameOrPassword {
+        public static string InvalidUsernameOrPassword {
             get {
                 return ResourceManager.GetString("InvalidUsernameOrPassword", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Must select at least one permission..
+        /// </summary>
+        public static string MustSelectAtLeastOnePermission {
+            get {
+                return ResourceManager.GetString("MustSelectAtLeastOnePermission", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Account.
         /// </summary>
-        internal static string NoMatchingExternalAccount {
+        public static string NoMatchingExternalAccount {
             get {
                 return ResourceManager.GetString("NoMatchingExternalAccount", resourceCulture);
             }
@@ -86,7 +95,7 @@ namespace Thinktecture.IdentityServer.Core.Resources
         /// <summary>
         ///   Looks up a localized string similar to Error authenticating with external provider.
         /// </summary>
-        internal static string NoSubjectFromExternalProvider {
+        public static string NoSubjectFromExternalProvider {
             get {
                 return ResourceManager.GetString("NoSubjectFromExternalProvider", resourceCulture);
             }
